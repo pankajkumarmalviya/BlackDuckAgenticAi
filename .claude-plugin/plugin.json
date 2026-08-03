@@ -1,0 +1,24 @@
+{
+  "name": "blackduck-ci",
+  "description": "Analyze code with BlackDuck security scanning for vulnerability detection and compliance reporting",
+  "version": "1.0.0",
+  "author": {
+    "name": "Pankaj Kumar Malviya",
+    "email": "pankajk@blackduck.com",
+    "url": "https://github.com/pankajkumarmalviya"
+  },
+  "repository": "https://github.com/pankajkumarmalviya/BlackDuckAgenticAi.git",
+  "license": "MIT",
+  "keywords": [
+    "security",
+    "scanning",
+    "vulnerability",
+    "compliance",
+    "blackduck",
+    "sast",
+    "dependency-check"
+  ],
+  "engines": {
+    "claude": ">=1.0.0"
+  }
+}
