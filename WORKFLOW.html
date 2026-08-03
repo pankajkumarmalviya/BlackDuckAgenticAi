@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claude Plugin Distribution Workflow</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: #1a202c;
+            margin-bottom: 50px;
+            font-size: 32px;
+        }
+
+        .diagram {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            overflow-x: auto;
+        }
+
+        svg {
+            display: block;
+            margin: 0 auto;
+            min-width: 100%;
+        }
+
+        /* Phase boxes styling */
+        .phase-box {
+            fill: #f8f9fa;
+            stroke: #dee2e6;
+            stroke-width: 2;
+        }
+
+        .phase-title {
+            font-size: 16px;
+            font-weight: 700;
+            fill: #1a202c;
+        }
+
+        .phase-item {
+            font-size: 13px;
+            fill: #495057;
+            font-weight: 500;
+        }
+
+        .phase-sub {
+            font-size: 12px;
+            fill: #6c757d;
+        }
+
+        /* Stage colors */
+        .stage-dev {
+            fill: #e7f5ff;
+            stroke: #1971c2;
+        }
+
+        .stage-publish {
+            fill: #f0f9ff;
+            stroke: #0ea5e9;
+        }
+
+        .stage-marketplace {
+            fill: #f5e6ff;
+            stroke: #9333ea;
+        }
+
+        .stage-install {
+            fill: #f0fdf4;
+            stroke: #22c55e;
+        }
+
+        .stage-use {
+            fill: #fff7ed;
+            stroke: #ea580c;
+        }
+
+        /* Connectors */
+        .arrow-line {
+            stroke: #cbd5e1;
+            stroke-width: 2;
+            fill: none;
+            marker-end: url(#arrowhead);
+        }
+
+        .arrow-dashed {
+            stroke: #cbd5e1;
+            stroke-width: 2;
+            stroke-dasharray: 5,5;
+            fill: none;
+            marker-end: url(#arrowhead);
+        }
+
+        /* Highlight elements */
+        .highlight {
+            fill: #fef3c7;
+            stroke: #f59e0b;
+            stroke-width: 2;
+        }
+
+        .icon {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .legend {
+            margin-top: 40px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid;
+        }
+
+        .legend-item.dev {
+            border-left-color: #1971c2;
+        }
+
+        .legend-item.publish {
+            border-left-color: #0ea5e9;
+        }
+
+        .legend-item.marketplace {
+            border-left-color: #9333ea;
+        }
+
+        .legend-item.install {
+            border-left-color: #22c55e;
+        }
+
+        .legend-item.use {
+            border-left-color: #ea580c;
+        }
+
+        .legend-title {
+            font-weight: 600;
+            font-size: 13px;
+            color: #1a202c;
+        }
+
+        .legend-desc {
+            font-size: 12px;
+            color: #6c757d;
+        }
+
+        .info-box {
+            background: #e7f5ff;
+            border-left: 4px solid #1971c2;
+            padding: 16px;
+            border-radius: 8px;
+            margin-top: 30px;
+            font-size: 14px;
+            color: #1a202c;
+            line-height: 1.6;
+        }
+
+        .info-box strong {
+            color: #1a202c;
+        }
+
+        .code-snippet {
+            background: #2d3748;
+            color: #a0aec0;
+            padding: 12px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            margin: 8px 0;
+            overflow-x: auto;
+        }
+
+        .success {
+            color: #22c55e;
+        }
+
+        .warning {
+            color: #f59e0b;
+        }
+
+        .secondary {
+            font-size: 11px;
+            fill: #6c757d;
+            font-style: italic;
+        }
+
+        @media (max-width: 768px) {
+            .diagram {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 24px;
+                margin-bottom: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Claude Plugin Distribution Workflow</h1>
+
+        <div class="diagram">
+            <svg viewBox="0 0 1400 900" xmlns="http://www.w3.org/2000/svg">
+                <!-- Arrow marker definition -->
+                <defs>
+                    <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                        <polygon points="0 0, 10 3, 0 6" fill="#cbd5e1" />
+                    </marker>
+                </defs>
+
+                <!-- Title section -->
+                <text x="700" y="30" text-anchor="middle" style="font-size: 18px; font-weight: bold; fill: #1a202c;">Complete Plugin Lifecycle</text>
+
+                <!-- PHASE 1: Development -->
+                <g>
+                    <rect x="50" y="80" width="220" height="280" rx="8" class="phase-box stage-dev"/>
+                    <text x="160" y="110" text-anchor="middle" class="phase-title">1️⃣ DEVELOPMENT</text>
+
+                    <text x="70" y="140" class="phase-item">📁 Create Structure:</text>
+                    <text x="80" y="158" class="phase-sub">blackduck-ci-plugin/</text>
+                    <text x="80" y="172" class="phase-sub">.claude-plugin/</text>
+                    <text x="80" y="186" class="phase-sub">skills/</text>
+
+                    <text x="70" y="210" class="phase-item">📝 Create Files:</text>
+                    <text x="80" y="228" class="phase-sub">plugin.json</text>
+                    <text x="80" y="242" class="phase-sub">SKILL.md</text>
+                    <text x="80" y="256" class="phase-sub">README.md</text>
+
+                    <text x="70" y="280" class="phase-item">✅ Test Locally:</text>
+                    <text x="80" y="298" class="phase-sub">claude plugin validate</text>
+                    <text x="80" y="312" class="phase-sub">/blackduck-ci</text>
+
+                    <text x="70" y="335" class="phase-item">🔧 Your Machine</text>
+                </g>
+
+                <!-- Arrow 1 to 2 -->
+                <path class="arrow-line" d="M 270 220 L 330 220"/>
+                <text x="300" y="210" text-anchor="middle" class="secondary">Push to</text>
+                <text x="300" y="225" text-anchor="middle" class="secondary">GitHub</text>
+
+                <!-- PHASE 2: Publish to GitHub -->
+                <g>
+                    <rect x="330" y="80" width="220" height="280" rx="8" class="phase-box stage-publish"/>
+                    <text x="440" y="110" text-anchor="middle" class="phase-title">2️⃣ PUBLISH</text>
+
+                    <text x="350" y="140" class="phase-item">🐙 GitHub Setup:</text>
+                    <text x="360" y="158" class="phase-sub">git init</text>
+                    <text x="360" y="172" class="phase-sub">git add .</text>
+                    <text x="360" y="186" class="phase-sub">git push</text>
+
+                    <text x="350" y="210" class="phase-item">🔓 Make Public:</text>
+                    <text x="360" y="228" class="phase-sub">Public Repository</text>
+                    <text x="360" y="242" class="phase-sub">README.md</text>
+                    <text x="360" y="256" class="phase-sub">LICENSE</text>
+
+                    <text x="350" y="280" class="phase-item">🔗 Share URL:</text>
+                    <text x="360" y="298" class="phase-sub">github.com/</text>
+                    <text x="360" y="312" class="phase-sub">your-org/plugin</text>
+
+                    <text x="350" y="335" class="phase-item">☁️ GitHub Servers</text>
+                </g>
+
+                <!-- Arrow 2 to 3 -->
+                <path class="arrow-dashed" d="M 550 220 L 610 220"/>
+                <text x="580" y="210" text-anchor="middle" class="secondary">Optional:</text>
+                <text x="580" y="225" text-anchor="middle" class="secondary">Submit</text>
+
+                <!-- PHASE 3: Community Marketplace -->
+                <g>
+                    <rect x="610" y="80" width="220" height="280" rx="8" class="phase-box stage-marketplace"/>
+                    <text x="720" y="110" text-anchor="middle" class="phase-title">3️⃣ MARKETPLACE</text>
+
+                    <text x="630" y="140" class="phase-item">📋 Submit Form:</text>
+                    <text x="640" y="158" class="phase-sub">platform.claude.com/</text>
+                    <text x="640" y="172" class="phase-sub">plugins/submit</text>
+
+                    <text x="630" y="196" class="phase-item">👥 Anthropic Review:</text>
+                    <text x="640" y="214" class="phase-sub">Quality check</text>
+                    <text x="640" y="228" class="phase-sub">Security scan</text>
+                    <text x="640" y="242" class="phase-sub">Docs review</text>
+
+                    <text x="630" y="266" class="phase-item">✨ Approved:</text>
+                    <text x="640" y="284" class="phase-sub">Listed in Marketplace</text>
+                    <text x="640" y="298" class="phase-sub">Searchable by name</text>
+                    <text x="640" y="312" class="phase-sub">Auto-updates</text>
+
+                    <text x="630" y="335" class="phase-item">⭐ Official Directory</text>
+                </g>
+
+                <!-- Arrow 3 down -->
+                <path class="arrow-line" d="M 720 360 L 720 410"/>
+                <text x="760" y="385" text-anchor="start" class="secondary">Users browse</text>
+
+                <!-- PHASE 4: Installation -->
+                <g>
+                    <rect x="610" y="410" width="220" height="280" rx="8" class="phase-box stage-install"/>
+                    <text x="720" y="440" text-anchor="middle" class="phase-title">4️⃣ INSTALL</text>
+
+                    <text x="630" y="470" class="phase-item">📥 Two Methods:</text>
+
+                    <text x="630" y="495" class="phase-item" style="fill: #22c55e; font-weight: bold;">Direct (GitHub)</text>
+                    <text x="640" y="513" class="phase-sub">claude plugin install</text>
+                    <text x="640" y="527" class="phase-sub">github.com/user/</text>
+                    <text x="640" y="541" class="phase-sub">blackduck-plugin</text>
+
+                    <text x="630" y="565" class="phase-item" style="fill: #9333ea; font-weight: bold;">Marketplace</text>
+                    <text x="640" y="583" class="phase-sub">Click install in</text>
+                    <text x="640" y="597" class="phase-sub">Claude Code UI</text>
+                    <text x="640" y="611" class="phase-sub">(after approval)</text>
+
+                    <text x="630" y="635" class="phase-item">✔️ Installed Locally</text>
+                    <text x="630" y="660" class="phase-item">🌍 Any Machine</text>
+                </g>
+
+                <!-- Arrow 4 left -->
+                <path class="arrow-line" d="M 610 550 L 550 550"/>
+                <text x="580" y="540" text-anchor="middle" class="secondary">Available</text>
+                <text x="580" y="555" text-anchor="middle" class="secondary">immediately</text>
+
+                <!-- PHASE 5: Usage -->
+                <g>
+                    <rect x="330" y="410" width="220" height="280" rx="8" class="phase-box stage-use"/>
+                    <text x="440" y="440" text-anchor="middle" class="phase-title">5️⃣ USAGE</text>
+
+                    <text x="350" y="470" class="phase-item">🎯 Run Command:</text>
+                    <text x="360" y="488" class="phase-sub">/blackduck-ci</text>
+                    <text x="360" y="502" class="phase-sub">or</text>
+                    <text x="360" y="516" class="phase-sub">/blackduck-ci:</text>
+                    <text x="360" y="530" class="phase-sub">blackduck-ci</text>
+
+                    <text x="350" y="554" class="phase-item">📊 Output:</text>
+                    <text x="360" y="572" class="phase-sub">Vulnerability report</text>
+                    <text x="360" y="586" class="phase-sub">Compliance data</text>
+                    <text x="360" y="600" class="phase-sub">Remediation steps</text>
+
+                    <text x="350" y="624" class="phase-item">🔄 Auto-Updates:</text>
+                    <text x="360" y="642" class="phase-sub">You push commits</text>
+                    <text x="360" y="656" class="phase-sub">Users get latest</text>
+
+                    <text x="350" y="680" class="phase-item">👨‍💻 Engineer</text>
+                </g>
+
+                <!-- Arrow 5 left -->
+                <path class="arrow-line" d="M 330 550 L 270 550"/>
+                <text x="300" y="540" text-anchor="middle" class="secondary">See in</text>
+                <text x="300" y="555" text-anchor="middle" class="secondary">/help</text>
+
+                <!-- Your users phase -->
+                <g>
+                    <rect x="50" y="410" width="220" height="280" rx="8" class="phase-box stage-dev"/>
+                    <text x="160" y="440" text-anchor="middle" class="phase-title">👥 USERS</text>
+
+                    <text x="70" y="470" class="phase-item">👨‍💼 Your Team</text>
+                    <text x="70" y="495" class="phase-item">🌐 Other Companies</text>
+                    <text x="70" y="520" class="phase-item">🔓 Open Source</text>
+                    <text x="70" y="545" class="phase-item">Community</text>
+
+                    <text x="70" y="580" class="phase-item">💡 Benefits:</text>
+                    <text x="80" y="598" class="phase-sub">Shared solutions</text>
+                    <text x="80" y="612" class="phase-sub">Feedback & PRs</text>
+                    <text x="80" y="626" class="phase-sub">Community</text>
+                    <text x="80" y="640" class="phase-sub">recognition</text>
+
+                    <text x="70" y="665" class="phase-item">🌍 Worldwide</text>
+                </g>
+
+                <!-- Feedback loop -->
+                <path class="arrow-dashed" d="M 160 410 Q 160 360 200 340" style="stroke: #f59e0b; stroke-width: 2; marker-end: url(#arrowhead);"/>
+                <text x="140" y="375" text-anchor="middle" class="secondary" style="fill: #f59e0b;">Issues &</text>
+                <text x="140" y="390" text-anchor="middle" class="secondary" style="fill: #f59e0b;">PRs</text>
+
+                <!-- Continuous improvement loop -->
+                <path class="arrow-dashed" d="M 270 150 Q 150 50 270 100" style="stroke: #6c757d; stroke-width: 2; marker-end: url(#arrowhead);"/>
+                <text x="150" y="45" text-anchor="middle" class="secondary">Iterate &</text>
+                <text x="150" y="60" text-anchor="middle" class="secondary">Improve</text>
+            </svg>
+        </div>
+
+        <div class="legend">
+            <div class="legend-item dev">
+                <div class="legend-title">Development</div>
+                <div class="legend-desc">Create plugin locally</div>
+            </div>
+            <div class="legend-item publish">
+                <div class="legend-title">Publish</div>
+                <div class="legend-desc">Push to GitHub</div>
+            </div>
+            <div class="legend-item marketplace">
+                <div class="legend-title">Marketplace</div>
+                <div class="legend-desc">Submit for approval (optional)</div>
+            </div>
+            <div class="legend-item install">
+                <div class="legend-title">Installation</div>
+                <div class="legend-desc">Users install via GitHub or Marketplace</div>
+            </div>
+            <div class="legend-item use">
+                <div class="legend-title">Usage</div>
+                <div class="legend-desc">Engineers use /blackduck-ci</div>
+            </div>
+        </div>
+
+        <div class="info-box">
+            <strong>📌 Key Distribution Paths:</strong><br><br>
+
+            <strong style="color: #0ea5e9;">✓ Immediate (GitHub Only)</strong><br>
+            Anyone can install immediately after you push to GitHub:<br>
+            <div class="code-snippet">claude plugin install https://github.com/your-username/blackduck-ci-plugin</div>
+
+            <br>
+            <strong style="color: #9333ea;">✓ Marketplace (Optional, Requires Approval)</strong><br>
+            Submit to <strong>platform.claude.com/plugins/submit</strong> for Anthropic review. Once approved, your plugin appears searchable in Claude Code's plugin marketplace, and updates automatically when you push commits to GitHub.
+            <br><br>
+
+            <strong style="color: #f59e0b;">⚡ Continuous Updates:</strong><br>
+            Whether users installed from GitHub or Marketplace, they always get your latest commits. Updates happen automatically—no need to re-release.
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,34 @@
+{
+    "data": {
+      "polaris": {
+      "serverUrl": "https://pim.dev.polaris.blackduck.com/",
+      "accessToken": "{polaris_token}",
+      "project": {
+        "name": "{AI_{UUID}}"
+      },
+      "branch": {
+        "name": "AI_BRANCH_{AIAGENT_{UUID}}"
+      },
+      "test": {
+        "sca": {
+          "tests": {
+            "sca": {
+              "completed": true
+            }
+          }
+        }
+      },
+      "application": {
+        "name": "{AIAGENT_{UUID}}"
+      },
+      "assessment": {
+        "types": [
+          "sca"
+        ]
+      },
+      "prcomment":{
+        "enabled": true
+      }
+    }
+  }
+}

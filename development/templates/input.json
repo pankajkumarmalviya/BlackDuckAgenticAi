@@ -1,0 +1,14 @@
+{
+  "scan_id": "${UUID}",
+  "project_path": "${PROJECT_PATH}",
+  "polaris": {
+    "token": "${POLARIS_TOKEN}",
+    "server_url": "${SERVER_URL}"
+  },
+  "blackduck": {
+    "api_token": "${API_TOKEN}",
+    "include_dev_deps": "${INCLUDE_DEV_DEPS}"
+  },
+  "correlation_id": "${UUID}",
+  "diagnostics": true
+}
