@@ -8,7 +8,6 @@ from mcp.server import Server
 from mcp.types import (
     Tool,
     TextContent,
-    ToolUseBlock,
 )
 
 from .types import BlackDuckInitInput, BlackDuckInitOutput
