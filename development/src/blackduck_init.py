@@ -52,20 +52,24 @@ class BlackDuckInitializer:
         """
         logger.info("Validating inputs...")
 
-        # Validate project path
+        # Validate project path (REQUIRED)
         if not validate_project_path(input_data.project_path):
             error_msg = f"Invalid project path: {input_data.project_path}"
             return False, error_msg
 
-        # Validate polaris token
+        # Validate polaris token (REQUIRED)
         if not input_data.polaris_token or len(input_data.polaris_token) < 10:
             error_msg = "Polaris token is required and must be at least 10 characters"
             return False, error_msg
 
-        # Validate server URL (should start with https://)
-        if not input_data.server_url.startswith("https://"):
-            error_msg = "Server URL must start with https://"
-            return False, error_msg
+        # Validate server URL (OPTIONAL for now - can be validated later)
+        if input_data.server_url:
+            if not input_data.server_url.startswith("https://"):
+                error_msg = "Server URL must start with https:// (if provided)"
+                return False, error_msg
+            logger.info(f"Server URL validated: {input_data.server_url}")
+        else:
+            logger.warning("Server URL not provided - will use default or skip validation")
 
         logger.info("Input validation passed")
         return True, "Valid"

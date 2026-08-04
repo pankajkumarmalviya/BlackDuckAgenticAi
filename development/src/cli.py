@@ -32,9 +32,10 @@ def cli():
 )
 @click.option(
     "--server",
-    required=True,
+    required=False,
     envvar="BLACKDUCK_SERVER_URL",
-    help="BlackDuck server URL (or set BLACKDUCK_SERVER_URL env var)",
+    default=None,
+    help="BlackDuck server URL (optional for now, or set BLACKDUCK_SERVER_URL env var)",
 )
 @click.option(
     "--api-token",

@@ -17,26 +17,26 @@ class BlackDuckInitInput(BaseModel):
         description="User-specific Polaris authentication token",
         min_length=10
     )
-    server_url: str = Field(
-        ...,
-        description="BlackDuck Hub server URL (must be HTTPS)",
+    server_url: Optional[str] = Field(
+        None,
+        description="BlackDuck Hub server URL (must be HTTPS) - Optional for now",
         example="https://blackduck.company.com"
     )
     api_token: Optional[str] = Field(
         None,
-        description="BlackDuck API authentication token",
-        default=None
+        description="BlackDuck API authentication token"
     )
     include_dev_deps: bool = Field(
         False,
-        description="Include development dependencies in scan",
-        default=False
+        description="Include development dependencies in scan"
     )
 
     @field_validator("server_url")
     @classmethod
-    def validate_server_url(cls, v: str) -> str:
-        """Validate server URL is HTTPS"""
+    def validate_server_url(cls, v: Optional[str]) -> Optional[str]:
+        """Validate server URL is HTTPS (if provided)"""
+        if v is None:
+            return v  # None is allowed
         if not v.startswith("https://"):
             raise ValueError("Server URL must start with https://")
         return v
