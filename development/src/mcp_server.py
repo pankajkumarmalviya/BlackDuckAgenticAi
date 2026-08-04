@@ -3,15 +3,16 @@
 import asyncio
 import json
 
-from mcp.server import Server
+from mcp.server import Server, ServerRequestContext, InitializationOptions
 from mcp.server.stdio import stdio_server
 from mcp.types import (
     Tool,
     TextContent,
-    ListToolsRequest,
     ListToolsResult,
-    CallToolRequest,
     CallToolResult,
+    PaginatedRequestParams,
+    CallToolRequestParams,
+    ServerCapabilities,
 )
 
 from .types import BlackDuckInitInput, BlackDuckInitOutput
@@ -19,10 +20,6 @@ from .blackduck_init import blackduck_init
 from .logger import get_logger
 
 logger = get_logger(__name__)
-
-
-# Initialize server
-server = Server("blackduck-ai-command")
 
 
 # Define the blackduck_init tool
@@ -59,23 +56,25 @@ BLACKDUCK_INIT_TOOL = Tool(
 )
 
 
-# Handle list_tools requests
-async def handle_list_tools(request: ListToolsRequest) -> ListToolsResult:
+async def handle_list_tools(
+    context: ServerRequestContext, params: PaginatedRequestParams | None
+) -> ListToolsResult:
     """Return list of available tools"""
     logger.info("Listing available tools")
     return ListToolsResult(tools=[BLACKDUCK_INIT_TOOL])
 
 
-# Handle tool calls
-async def handle_call_tool(request: CallToolRequest) -> CallToolResult:
+async def handle_call_tool(
+    context: ServerRequestContext, params: CallToolRequestParams
+) -> CallToolResult:
     """Execute tool calls"""
 
-    if request.params.name != "blackduck_init":
-        logger.error(f"Unknown tool: {request.params.name}")
+    if params.name != "blackduck_init":
+        logger.error(f"Unknown tool: {params.name}")
         return CallToolResult(
             content=[TextContent(
                 type="text",
-                text=json.dumps({"error": f"Unknown tool: {request.params.name}", "success": False})
+                text=json.dumps({"error": f"Unknown tool: {params.name}", "success": False})
             )],
             is_error=True
         )
@@ -84,7 +83,7 @@ async def handle_call_tool(request: CallToolRequest) -> CallToolResult:
 
     try:
         # Parse input
-        args = request.params.arguments or {}
+        args = params.arguments or {}
         input_data = BlackDuckInitInput(
             project_path=args.get("project_path"),
             polaris_token=args.get("polaris_token"),
@@ -124,17 +123,28 @@ async def handle_call_tool(request: CallToolRequest) -> CallToolResult:
         )
 
 
-# Register handlers
-server.add_request_handler("tools/list", ListToolsRequest, handle_list_tools)
-server.add_request_handler("tools/call", CallToolRequest, handle_call_tool)
+# Initialize server with handlers
+server = Server(
+    "blackduck-ai-command",
+    on_list_tools=handle_list_tools,
+    on_call_tool=handle_call_tool,
+)
 
 
 async def main():
     """Run the MCP server"""
     logger.info("Starting MCP server...")
-    async with stdio_server(server) as streams:
+
+    # Create initialization options
+    init_options = InitializationOptions(
+        server_name="blackduck-ai-command",
+        server_version="1.0.0",
+        capabilities=ServerCapabilities(tools={}),
+    )
+
+    async with stdio_server() as (read_stream, write_stream):
         logger.info("MCP server listening on stdio")
-        await streams.wait_closed()
+        await server.run(read_stream, write_stream, init_options)
 
 
 if __name__ == "__main__":
